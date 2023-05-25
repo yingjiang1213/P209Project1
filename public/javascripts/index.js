@@ -23,12 +23,23 @@ document.addEventListener("DOMContentLoaded", function () {
 //Add button events ************************************************************************
     
     document.getElementById("buttonAdd").addEventListener("click", function () {
-        itemArray.push(new GroceryObject(document.getElementById("title").value,
+        let newItem = new GroceryObject(document.getElementById("title").value,
         document.getElementById("quantity").value,
         selectedCateg,
-        document.getElementById("price").value));
+        document.getElementById("price").value);
         document.location.href = "index.html#ListAll";
         //Add the URL value
+
+        $.ajax({
+            url:"/AddItem",
+            type:"POST",
+            data: JSON.stringify(newItem),
+            contentType:"application/json; charser=utf-8",
+            success: function(result){
+                console.log(result);
+                document.location.href="index.html#ListAll";
+            }
+        });
     });
 
     
@@ -41,6 +52,25 @@ document.addEventListener("DOMContentLoaded", function () {
 
     $(document).bind("change", "#select-categ", function (event, ui) {
         selectedCateg = $('#select-categ').val();
+    });
+
+    document.getElementById("delete").addEventListener("click", function(){
+        let localParm = localStorage.getItem('parm');
+        deleteItem(localParm);
+    });
+
+    document.getElementById("buttonSortTitle").addEventListener("click", function () {
+        itemArray.sort(function (a, b) {
+            if (a.Title.toLowerCase() < b.Title.toLowerCase()) {
+              return -1;
+            }
+            if (a.Title.toLowerCase() > b.Title.toLowerCase()) {
+              return 1;
+            }
+            return 0;
+          });
+        createList();
+        document.location.href = "index.html#ListAll";
     });
 
     document.getElementById("buttonSortCateg").addEventListener("click",function(){
@@ -57,22 +87,11 @@ document.addEventListener("DOMContentLoaded", function () {
             document.location.href = "index.html#ListAll";
         });
     
-    document.getElementById("buttonSortTitle").addEventListener("click", function () {
-        itemArray.sort(function (a, b) {
-            if (a.Title.toLowerCase() < b.Title.toLowerCase()) {
-              return -1;
-            }
-            if (a.Title.toLowerCase() > b.Title.toLowerCase()) {
-              return 1;
-            }
-            return 0;
-          });
-        createList();
-        document.location.href = "index.html#ListAll";
-    });
 
-    document.getElementById("buttonClearEverything").addEventListener("click", function(){
-        itemArray=[];
+    document.getElementById("buttonBackToEdit").addEventListener("click", function(){
+        //var ItemListul= document.getElementById("ItemListul");
+        //ItemListul.innerHTML=" ";
+        //itemArray=[];
         document.location.href = "index.html#Edit";
     });
    
@@ -95,11 +114,6 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById('itemQuantity').innerHTML="Quantity: " + itemArray[pointer].Quantity;
         document.getElementById('itemPrice').innerHTML="Price per unit: $" +itemArray[pointer].Price;
         
-        //document.getElementById('delete').addEventListener('click', function(){
-            
-                //localStorage.removeItem(itemArray);
-        
-            //document.location.href = "index.html#Edit";
         })
     });
 //});
@@ -113,25 +127,29 @@ function createList() {
     var theList = document.getElementById("ItemListul");
     theList.innerHTML = "";
 
-    itemArray.forEach(function (element,i) {  
-        var li = document.createElement('li');
-        li.classList.add('oneItem');
-        li.setAttribute("data-parm",element.ID)
-        li.innerHTML =  itemArray[i].ID + ":  " + element.Title + " " + element.Category;
-        theList.appendChild(li)
-    });
+    $.get("/getAllItems", function(data, status){
+        itemArray=data;
+    
+            itemArray.forEach(function (element,i) {  
+                var li = document.createElement('li');
+                li.classList.add('oneItem');
+                li.setAttribute("data-parm",element.ID)
+                li.innerHTML =  itemArray[i].ID + ":  " + element.Title + " " + element.Category;
+                theList.appendChild(li)
+            });
 
-    var lilist= document.getElementsByClassName("oneItem");
-    let newItemArray = Array.from(lilist);
-    newItemArray.forEach(function (element,i){
-        element.addEventListener('click',function(){
-            var parm = this.getAttribute("data-parm");
-            localStorage.setItem('parm',parm);
+            var lilist= document.getElementsByClassName("oneItem");
+            let newItemArray = Array.from(lilist);
+            newItemArray.forEach(function (element,i){
+                element.addEventListener('click',function(){
+                    var parm = this.getAttribute("data-parm");
+                    localStorage.setItem('parm',parm);
 
-            let stringItemArray= JSON.stringify(itemArray);
-            localStorage.setItem('itemArray',stringItemArray);
-            document.location.href="index.html#details";
-        });
+                    let stringItemArray= JSON.stringify(itemArray);
+                    localStorage.setItem('itemArray',stringItemArray);
+                    document.location.href="index.html#details";
+                });
+            });
     });
 };
 
@@ -139,25 +157,51 @@ function createList1() {
     var theList = document.getElementById("costPage");
     theList.innerHTML = "";
 
-    itemArray.forEach(function (element,i) {  
-        var li = document.createElement('li');
-        li.classList.add('oneItem');
-        li.setAttribute("data-parm",element.ID)
-        li.innerHTML =  itemArray[i].ID + ":  " + element.Title + " " + element.Quantity + " x $"+element.Price +" = $"+ element.TotalPrice;
-        theList.appendChild(li)
-    });
+    $.get("/getAllItems", function(data, status){
+        itemArray=data;
 
-    var lilist= document.getElementsByClassName("oneItem");
-    let newItemArray = Array.from(lilist);
-    newItemArray.forEach(function (element,i){
-        element.addEventListener('click',function(){
-            var parm = this.getAttribute("data-parm");
-            localStorage.setItem('parm',parm);
-        });
-    });
-    let showPrice = document.getElementById("endPrice")
-    showPrice.innerHTML = "The grand total for this shopping list is $" + getGrandTotal();
+            itemArray.forEach(function (element,i) {  
+                var li = document.createElement('li');
+                li.classList.add('oneItem');
+                li.setAttribute("data-parm",element.ID)
+                li.innerHTML =  itemArray[i].ID + ":  " + element.Title + " " + element.Quantity + " x $"+element.Price +" = $"+ element.TotalPrice;
+                theList.appendChild(li)
+            });
+
+            var lilist= document.getElementsByClassName("oneItem");
+            let newItemArray = Array.from(lilist);
+            newItemArray.forEach(function (element,i){
+                element.addEventListener('click',function(){
+                    var parm = this.getAttribute("data-parm");
+                    localStorage.setItem('parm',parm);
+                });
+            });
+            let showPrice = document.getElementById("endPrice")
+            showPrice.innerHTML = "The grand total for this shopping list is $" + getGrandTotal();
+
+});
+
 };
+
+function deleteItem(which){
+    console.log(which);
+    //let arrayPointer= GetArrayPointer(which);
+    //itemArray.splice(arrayPointer,1);
+
+    $.ajax({
+        type:"DELETE",
+        url:"/DeleteItem/" + which,
+        success: function(result){
+            alert(result);
+            document.location.href="index.html#ListAll";
+        },
+        error: function(xhr, textStatus, errorThrown){
+            alert("Server could not delete Item with ID"+ which);
+            document.location.href="index.html#ListAll";
+        }
+    });
+}
+
 function getGrandTotal(){
         let grandTotal = 0;
         let itemTotal;
@@ -181,3 +225,5 @@ function getGrandTotal(){
             }
         }
     }
+
+
