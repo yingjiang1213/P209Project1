@@ -60,20 +60,43 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     document.getElementById("buttonSortTitle").addEventListener("click", function () {
-        itemArray.sort(function (a, b) {
-            if (a.Title.toLowerCase() < b.Title.toLowerCase()) {
-              return -1;
-            }
-            if (a.Title.toLowerCase() > b.Title.toLowerCase()) {
-              return 1;
-            }
-            return 0;
+    
+       var theList = document.getElementById("ItemListul");
+       theList.innerHTML = "";
+   
+       $.get("/getAllItems", function(data, status){
+           itemArray=data;
+       
+                itemArray.sort(function (a, b) {
+                    if (a.Title.toLowerCase() < b.Title.toLowerCase()) {
+                      return -1;
+                    }
+                    if (a.Title.toLowerCase() > b.Title.toLowerCase()) {
+                      return 1;
+                    }
+                    return 0;
+                });
+                itemArray.forEach(function (element,i) {  
+                    var li = document.createElement('li');
+                    li.classList.add('oneItem');
+                    li.setAttribute("data-parm",element.ID)
+                    li.innerHTML =  itemArray[i].ID + ":  " + element.Title + " " + element.Category;
+                    theList.appendChild(li)
+                 });
           });
-        createList();
+        
         document.location.href = "index.html#ListAll";
     });
 
+
+    
     document.getElementById("buttonSortCateg").addEventListener("click",function(){
+        var theList = document.getElementById("ItemListul");
+       theList.innerHTML = "";
+   
+       $.get("/getAllItems", function(data, status){
+           itemArray=data;
+       
         itemArray.sort(function(a,b){
             if (a.Category < b.Category) {
                 return -1;
@@ -83,9 +106,16 @@ document.addEventListener("DOMContentLoaded", function () {
               }
               return 0;
             });   
-            createList();
+        itemArray.forEach(function (element,i) {  
+                var li = document.createElement('li');
+                li.classList.add('oneItem');
+                li.setAttribute("data-parm",element.ID)
+                li.innerHTML =  itemArray[i].ID + ":  " + element.Title + " " + element.Category;
+                theList.appendChild(li)
+             });
+            });
             document.location.href = "index.html#ListAll";
-        });
+    });
     
 
     document.getElementById("buttonBackToEdit").addEventListener("click", function(){
@@ -114,9 +144,8 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById('itemQuantity').innerHTML="Quantity: " + itemArray[pointer].Quantity;
         document.getElementById('itemPrice').innerHTML="Price per unit: $" +itemArray[pointer].Price;
         
-        })
-    });
-//});
+        });
+});
  
 // end of page before show code *************************************************************************
 
@@ -225,5 +254,3 @@ function getGrandTotal(){
             }
         }
     }
-
-
