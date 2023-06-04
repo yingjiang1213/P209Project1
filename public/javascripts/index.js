@@ -83,6 +83,18 @@ document.addEventListener("DOMContentLoaded", function () {
                     li.innerHTML =  itemArray[i].ID + ":  " + element.Title + " " + element.Category;
                     theList.appendChild(li)
                  });
+                 var lilist= document.getElementsByClassName("oneItem");
+                 let newItemArray = Array.from(lilist);
+                 newItemArray.forEach(function (element,i){
+                     element.addEventListener('click',function(){
+                         var parm = this.getAttribute("data-parm");
+                         localStorage.setItem('parm',parm);
+     
+                         let stringItemArray= JSON.stringify(itemArray);
+                         localStorage.setItem('itemArray',stringItemArray);
+                         document.location.href="index.html#details";
+                     });
+                 });
           });
         
         document.location.href = "index.html#ListAll";
@@ -112,6 +124,18 @@ document.addEventListener("DOMContentLoaded", function () {
                 li.setAttribute("data-parm",element.ID)
                 li.innerHTML =  itemArray[i].ID + ":  " + element.Title + " " + element.Category;
                 theList.appendChild(li)
+             });
+             var lilist= document.getElementsByClassName("oneItem");
+             let newItemArray = Array.from(lilist);
+             newItemArray.forEach(function (element,i){
+                 element.addEventListener('click',function(){
+                     var parm = this.getAttribute("data-parm");
+                     localStorage.setItem('parm',parm);
+ 
+                     let stringItemArray= JSON.stringify(itemArray);
+                     localStorage.setItem('itemArray',stringItemArray);
+                     document.location.href="index.html#details";
+                 });
              });
             });
             document.location.href = "index.html#ListAll";
