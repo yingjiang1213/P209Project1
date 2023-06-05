@@ -9,6 +9,9 @@
 #navB:hover{
   background-color: #0000A5;
 }
+.active{
+  background-color: #2b3856;
+}
 #homePage{
   font-family: Aclonica;
   color:#2554C7;
