@@ -1,5 +1,33 @@
 var express = require('express');
 var router = express.Router();
+var fs = require("fs");
+
+let serverItemArray = [];
+
+let fileManager  = {
+  read: function() {
+    var rawdata = fs.readFileSync('objectdata.json');
+    let goodData = JSON.parse(rawdata);
+    serverItemArray = goodData;
+  },
+
+  write: function() {
+    let data = JSON.stringify(serverItemArray);
+    fs.writeFileSync('objectdata.json', data);
+  },
+
+  validData: function() {
+    var rawdata = fs.readFileSync('objectdata.json');
+    console.log(rawdata.length);
+    if(rawdata.length < 1) {
+      return false;
+    }
+    else {
+      return true;
+    }
+  }
+};
+
 
 let GroceryObject = function (pTitle,pQuantity,pCategory,pPrice,pTotalPrice){
   this.ID=Math.random().toString(16).slice(5);
@@ -10,7 +38,7 @@ let GroceryObject = function (pTitle,pQuantity,pCategory,pPrice,pTotalPrice){
   this.TotalPrice = pPrice * pQuantity;
 }
 
-let serverItemArray = [];
+
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -19,6 +47,7 @@ router.get('/', function(req, res, next) {
 
 /* GET all Item data */
 router.get('/getAllItems', function(req, res){
+  fileManager.read();
   res.status(200).json(serverItemArray);
 });
 
@@ -26,6 +55,7 @@ router.get('/getAllItems', function(req, res){
 router.post('/AddItem', function(req, res){
   const newItem =req.body;
   serverItemArray.push(newItem);
+  fileManager.write();
   res.status(200).json(newItem);
 });
 
@@ -43,6 +73,7 @@ router.delete('/DeleteItem/:ID',(req, res) => {
   }
   else{
     serverItemArray.splice(pointer, 1);
+    fileManager.write();
     res.send('Item with ID: '+ delID +' Deleted!');
   }
 }); 
